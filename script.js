@@ -1,58 +1,55 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const todoInput = document.getElementById("todoInput");
-  const submitBtn = document.getElementById("submitBtn");
-  const todoList = document.getElementById("todoList");
-  const deleteAllBtn = document.getElementById("deleteAllBtn");
+  const todoForm = document.getElementById("todo-form");
+  const todoInput = document.getElementById("todo-input");
+  const prioritySelect = document.getElementById("priority");
+  const todoList = document.getElementById("todo-list");
+  const deleteAllBtn = document.getElementById("delete-all");
+  const emptyMessage = document.getElementById("empty-message");
 
-  // Load todos from localStorage if available
-  loadTodos();
+  todoForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  submitBtn.addEventListener("click", addTodo);
-  deleteAllBtn.addEventListener("click", deleteAllTodos);
-
-  function addTodo() {
     const todoText = todoInput.value.trim();
-    if (todoText === "") return;
+    const priority = prioritySelect.value;
 
-    // Get selected priority
-    const priorityOptions = document.getElementsByName("priority");
-    let selectedPriority;
-    for (const option of priorityOptions) {
-      if (option.checked) {
-        selectedPriority = option.value;
-        break;
-      }
+    if (todoText) {
+      addTodoItem(todoText, priority);
+      todoInput.value = "";
+      emptyMessage.style.display = "none";
     }
+  });
 
-    // Get current date
+  deleteAllBtn.addEventListener("click", function () {
+    todoList.innerHTML = "";
+    todoList.appendChild(emptyMessage);
+    emptyMessage.style.display = "block";
+  });
+
+  function addTodoItem(text, priority) {
     const now = new Date();
-    const dateString = now.toLocaleDateString("en-US", {
+    const dateOptions = {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+    };
+    const dateString = now.toLocaleDateString("en-US", dateOptions);
 
-    // Remove "No tasks yet" message if it exists
-    const emptyMessage = todoList.querySelector(".empty-message");
-    if (emptyMessage) {
-      emptyMessage.remove();
-    }
-
-    // Create todo item
     const todoItem = document.createElement("div");
-    todoItem.className = `todo-item ${selectedPriority}`;
+    todoItem.className = `todo-item priority-${priority}`;
 
     todoItem.innerHTML = `
-                    <input type="checkbox" class="checkbox">
                     <div class="todo-content">
-                        <div class="todo-text">${todoText}</div>
-                        <div class="todo-date">${dateString}</div>
-                        <div class="todo-priority ${selectedPriority}">
-                            Priority: ${
-                              selectedPriority.charAt(0).toUpperCase() +
-                              selectedPriority.slice(1)
-                            }
+                        <input type="checkbox" class="todo-checkbox">
+                        <div>
+                            <p class="todo-text">${text}</p>
+                            <p class="todo-date">${dateString}</p>
+                            <span class="todo-priority priority-${priority}">
+                                ${
+                                  priority.charAt(0).toUpperCase() +
+                                  priority.slice(1)
+                                } Priority
+                            </span>
                         </div>
                     </div>
                     <button class="delete-btn">
@@ -60,124 +57,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     </button>
                 `;
 
-    todoList.prepend(todoItem);
+    const checkbox = todoItem.querySelector(".todo-checkbox");
+    const todoText = todoItem.querySelector(".todo-text");
 
-    // Add event listeners to the new todo item
-    const checkbox = todoItem.querySelector(".checkbox");
     checkbox.addEventListener("change", function () {
       if (this.checked) {
-        todoItem.classList.add("completed");
+        todoText.classList.add("completed");
       } else {
-        todoItem.classList.remove("completed");
+        todoText.classList.remove("completed");
       }
-      saveTodos();
     });
 
     const deleteBtn = todoItem.querySelector(".delete-btn");
     deleteBtn.addEventListener("click", function () {
       todoItem.remove();
-      if (todoList.children.length === 0) {
-        todoList.innerHTML =
-          '<div class="empty-message">No tasks yet. Add one above!</div>';
+
+      if (todoList.children.length === 1) {
+        emptyMessage.style.display = "block";
       }
-      saveTodos();
     });
 
-    // Clear input
-    todoInput.value = "";
-
-    // Save todos
-    saveTodos();
-  }
-
-  function deleteAllTodos() {
-    todoList.innerHTML =
-      '<div class="empty-message">No tasks yet. Add one above!</div>';
-    saveTodos();
-  }
-
-  function saveTodos() {
-    const todos = [];
-    const todoItems = todoList.querySelectorAll(".todo-item");
-
-    todoItems.forEach((item) => {
-      const todoText = item.querySelector(".todo-text").textContent;
-      const isCompleted = item.querySelector(".checkbox").checked;
-      const dateText = item.querySelector(".todo-date").textContent;
-      const priorityText = item.querySelector(".todo-priority").textContent;
-      const priorityClass = item.querySelector(".todo-priority").className;
-      const itemClass = item.className;
-
-      todos.push({
-        text: todoText,
-        completed: isCompleted,
-        date: dateText,
-        priority: priorityText,
-        priorityClass: priorityClass,
-        itemClass: itemClass,
-      });
-    });
-
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }
-
-  function loadTodos() {
-    const savedTodos = localStorage.getItem("todos");
-    if (savedTodos) {
-      const todos = JSON.parse(savedTodos);
-
-      if (todos.length > 0) {
-        todoList.innerHTML = "";
-
-        todos.forEach((todo) => {
-          const todoItem = document.createElement("div");
-          todoItem.className = todo.itemClass;
-
-          todoItem.innerHTML = `
-                                <input type="checkbox" class="checkbox" ${
-                                  todo.completed ? "checked" : ""
-                                }>
-                                <div class="todo-content">
-                                    <div class="todo-text">${todo.text}</div>
-                                    <div class="todo-date">${todo.date}</div>
-                                    <div class="${todo.priorityClass}">${
-            todo.priority
-          }</div>
-                                </div>
-                                <button class="delete-btn">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            `;
-
-          if (todo.completed) {
-            todoItem.classList.add("completed");
-          }
-
-          todoList.appendChild(todoItem);
-
-          // Add event listeners
-          const checkbox = todoItem.querySelector(".checkbox");
-          checkbox.addEventListener("change", function () {
-            if (this.checked) {
-              todoItem.classList.add("completed");
-            } else {
-              todoItem.classList.remove("completed");
-            }
-            saveTodos();
-          });
-
-          const deleteBtn = todoItem.querySelector(".delete-btn");
-          deleteBtn.addEventListener("click", function () {
-            todoItem.remove();
-            if (todoList.children.length === 0) {
-              todoList.innerHTML =
-                '<div class="empty-message">No tasks yet. Add one above!</div>';
-            }
-            saveTodos();
-          });
-        });
-      }
-    }
+    todoList.appendChild(todoItem);
   }
 });
 
@@ -187,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (b) {
       var d = b.createElement("script");
       d.innerHTML =
-        "window.__CF$cv$params={r:'9637b59d46848808',t:'MTc1MzIzNzM0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+        "window.__CF$cv$params={r:'96394ba966bc4086',t:'MTc1MzI1Mzk3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
       b.getElementsByTagName("head")[0].appendChild(d);
     }
   }

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simple Todo List</title>
+    <title>Todo List App</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -12,41 +12,56 @@
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <h1>My Todo List</h1>
+      <div class="card profile">
+        <div class="profile-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="profile-info">
+          <h2>John Doe</h2>
+          <p>Project Manager</p>
+        </div>
       </div>
-
-      <div class="input-section">
-        <input type="text" id="todoInput" placeholder="Enter your task..." />
-
-        <div class="priority-selector">
-          <label>Priority:</label>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="priority" value="low" checked />
-              <span class="low-priority">Low</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="priority" value="medium" />
-              <span class="medium-priority">Medium</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="priority" value="high" />
-              <span class="high-priority">High</span>
-            </label>
+      <div class="card">
+        <h2 class="form-title">Add New Task</h2>
+        <form id="todo-form">
+          <div class="form-group">
+            <label for="todo-input" class="form-label">Task Description</label>
+            <input
+              type="text"
+              id="todo-input"
+              class="form-input"
+              placeholder="Enter your task here..."
+              required
+            />
           </div>
+
+          <div class="form-group">
+            <label for="priority" class="form-label">Priority Level</label>
+            <select id="priority" class="form-select">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Task
+          </button>
+        </form>
+      </div>
+      <div class="card">
+        <div class="list-header">
+          <h2 class="form-title">My Tasks</h2>
+          <button id="delete-all" class="btn btn-danger">
+            <i class="fas fa-trash-alt"></i> Delete All
+          </button>
         </div>
 
-        <button id="submitBtn" class="submit-btn">Add Task</button>
-      </div>
-
-      <div class="list-header">
-        <h2 class="list-title">Tasks</h2>
-        <button id="deleteAllBtn" class="delete-all-btn">Delete All</button>
-      </div>
-
-      <div id="todoList" class="todo-list">
-        <div class="empty-message">No tasks yet. Add one above!</div>
+        <div id="todo-list">
+          <p id="empty-message" class="empty-message">
+            No tasks yet. Add a new task above!
+          </p>
+        </div>
       </div>
     </div>
     <script src="script.js"></script>
